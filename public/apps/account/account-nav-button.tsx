@@ -27,7 +27,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { CoreStart } from 'opensearch-dashboards/public';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { RoleInfoPanel } from './role-info-panel';
 import { PasswordResetPanel } from './password-reset-panel';
 import { TenantSwitchPanel } from './tenant-switch-panel';
@@ -35,6 +35,8 @@ import { ClientConfigType } from '../../types';
 import { LogoutButton } from './log-out-button';
 import { resolveTenantName } from '../configuration/utils/tenant-utils';
 import { getShouldShowTenantPopup, setShouldShowTenantPopup } from '../../utils/storage-utils';
+import { getAuthInfo } from '../../utils/auth-info-utils';
+import { fetchAccountInfo } from './utils';
 
 export function AccountNavButton(props: {
   coreStart: CoreStart;
@@ -48,6 +50,7 @@ export function AccountNavButton(props: {
   const [modal, setModal] = React.useState<React.ReactNode>(null);
   const horizontalRule = <EuiHorizontalRule margin="xs" />;
   const username = props.username;
+  const [isMultiTenancyEnabled, setIsMultiTenancyEnabled] = useState(props.config.multitenancy.enabled);
 
   const showTenantSwitchPanel = useCallback(
     () =>
@@ -67,9 +70,23 @@ export function AccountNavButton(props: {
       ),
     [props.config, props.coreStart, props.tenant]
   );
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsMultiTenancyEnabled((await getAuthInfo(props.coreStart.http)).tenancy_enabled);
+
+      } catch (e) {
+        // TODO: switch to better error display.
+        console.error(e);
+      }
+    };
+
+    fetchData();
+  }, [props.coreStart.http, props.tenant, props.config.multitenancy]);
 
   // Check if the tenant modal should be shown on load
-  if (props.config.multitenancy.enabled && getShouldShowTenantPopup()) {
+
+  if (isMultiTenancyEnabled && getShouldShowTenantPopup()) {
     setShouldShowTenantPopup(false);
     showTenantSwitchPanel();
   }
@@ -112,10 +129,15 @@ export function AccountNavButton(props: {
       >
         View roles and identities
       </EuiButtonEmpty>
-      {horizontalRule}
-      <EuiButtonEmpty data-test-subj="switch-tenants" size="xs" onClick={showTenantSwitchPanel}>
-        Switch tenants
-      </EuiButtonEmpty>
+      {isMultiTenancyEnabled && (
+        <>
+          {horizontalRule}
+          <EuiButtonEmpty data-test-subj="switch-tenants" size="xs" onClick={showTenantSwitchPanel}>
+            Switch tenants
+            </EuiButtonEmpty>
+        </>
+        )
+      }
       {props.isInternalUser && (
         <>
           {horizontalRule}

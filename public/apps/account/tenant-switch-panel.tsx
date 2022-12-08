@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { keys } from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import { ClientConfigType } from '../../types';
 import {
   RESOLVED_GLOBAL_TENANT,
@@ -42,6 +42,7 @@ import {
 import { fetchAccountInfo } from './utils';
 import { constructErrorMessageAndLog } from '../error-utils';
 import { getSavedTenant, setSavedTenant } from '../../utils/storage-utils';
+import { getAuthInfo } from '../../utils/auth-info-utils';
 
 interface TenantSwitchPanelProps {
   coreStart: CoreStart;
@@ -65,6 +66,8 @@ export function TenantSwitchPanel(props: TenantSwitchPanelProps) {
   const [selectedCustomTenantOption, setSelectedCustomTenantOption] = React.useState<
     EuiComboBoxOptionOption[]
   >([]);
+  const [isPrivateEnabled, setIsPrivateEnabled] = useState(props.config.multitenancy.tenants.enable_private);
+  const [isMultiTenancyEnabled, setIsMultiTenancyEnabled] = useState(props.config.multitenancy.enabled);
 
   const setCurrentTenant = (currentRawTenantName: string, currentUserName: string) => {
     const resolvedTenantName = resolveTenantName(currentRawTenantName, currentUserName);
@@ -84,6 +87,9 @@ export function TenantSwitchPanel(props: TenantSwitchPanelProps) {
       try {
         const accountInfo = await fetchAccountInfo(props.coreStart.http);
         setRoles(accountInfo.data.roles);
+
+        setIsPrivateEnabled((await getAuthInfo(props.coreStart.http)).private_tenant_enabled);
+        setIsMultiTenancyEnabled((await getAuthInfo(props.coreStart.http)).tenancy_enabled);
 
         const tenantsInfo = accountInfo.data.tenants || {};
         setTenants(keys(tenantsInfo));
@@ -122,9 +128,9 @@ export function TenantSwitchPanel(props: TenantSwitchPanelProps) {
       label: option,
     }));
 
-  const isMultiTenancyEnabled = props.config.multitenancy.enabled;
+  // const isMultiTenancyEnabled = props.config.multitenancy.enabled;
   const isGlobalEnabled = props.config.multitenancy.tenants.enable_global;
-  const isPrivateEnabled = props.config.multitenancy.tenants.enable_private;
+  // const isPrivateEnabled = props.config.multitenancy.tenants.enable_private;
 
   const DEFAULT_READONLY_ROLES = ['kibana_read_only'];
   const readonly = roles.some(

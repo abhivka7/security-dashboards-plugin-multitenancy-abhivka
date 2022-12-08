@@ -115,6 +115,7 @@ export abstract class AuthenticationType implements IAuthenticationType {
         const additonalAuthHeader = this.getAdditionalAuthHeader(request);
         Object.assign(authHeaders, additonalAuthHeader);
         authInfo = await this.securityClient.authinfo(request, additonalAuthHeader);
+        this.logger.error("******** authInfo: " + authInfo.user);
         cookie = this.getCookie(request, authInfo);
 
         // set tenant from cookie if exist
@@ -206,6 +207,7 @@ export abstract class AuthenticationType implements IAuthenticationType {
     }
     if (!authInfo) {
       authInfo = await this.securityClient.authinfo(request, authHeaders);
+      this.logger.error("******** authInfo xxx: " + JSON.stringify(authInfo));
     }
     authState.authInfo = authInfo;
 
