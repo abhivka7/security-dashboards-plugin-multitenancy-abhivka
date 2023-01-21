@@ -15,6 +15,7 @@
 
 import { ILegacyClusterClient, OpenSearchDashboardsRequest } from '../../../../src/core/server';
 import { User } from '../auth/user';
+import { getAuthInfo } from '../../public/utils/auth-info-utils';
 
 export class SecurityClient {
   constructor(private readonly esClient: ILegacyClusterClient) {}

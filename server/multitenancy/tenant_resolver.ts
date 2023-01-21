@@ -18,7 +18,7 @@ import { OpenSearchDashboardsRequest } from '../../../../src/core/server';
 import { SecuritySessionCookie } from '../session/security_cookie';
 import { SecurityPluginConfigType } from '..';
 import { GLOBAL_TENANT_SYMBOL, PRIVATE_TENANT_SYMBOL } from '../../common';
-
+import { Logger } from 'opensearch-dashboards/server';
 export const PRIVATE_TENANTS: string[] = [PRIVATE_TENANT_SYMBOL, 'private'];
 export const GLOBAL_TENANTS: string[] = ['global', GLOBAL_TENANT_SYMBOL];
 /**
@@ -40,6 +40,10 @@ export function resolveTenant(
   config: SecurityPluginConfigType,
   cookie: SecuritySessionCookie
 ): string | undefined {
+  // let logger: Logger;
+  var util = require('util')
+  // console.log("*** request = " + util.inspect(request));
+
   const DEFAULT_READONLY_ROLES = ['kibana_read_only'];
   let selectedTenant: string | undefined;
   const securityTenant_ = request?.url?.searchParams?.get('securityTenant_');

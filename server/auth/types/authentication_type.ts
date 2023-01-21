@@ -32,6 +32,8 @@ import { SecurityClient } from '../../backend/opensearch_security_client';
 import { resolveTenant, isValidTenant } from '../../multitenancy/tenant_resolver';
 import { UnauthenticatedError } from '../../errors';
 import { GLOBAL_TENANT_SYMBOL } from '../../../common';
+import { getAuthInfo } from '../../../public/utils/auth-info-utils';
+
 
 export interface IAuthenticationType {
   type: string;
@@ -98,7 +100,22 @@ export abstract class AuthenticationType implements IAuthenticationType {
       return toolkit.authenticated();
     }
 
+    let use_default_tenant = false;
+
+
     const authState: OpenSearchDashboardsAuthState = {};
+    const browserCookie = await this.sessionStorageFactory.asScoped(request).get();
+
+    if (!(browserCookie && isValidTenant(browserCookie.tenant))) {
+      this.logger.error("********** FInally !!!!!!!!!! *********************")
+      use_default_tenant = true;
+    }
+    else {
+      this.logger.error("*********** try again *****");
+    }
+
+    this.logger.error("************* browserCookie = " + JSON.stringify(browserCookie));
+    // const [defaultTenant, setDefaultTenant] = useState(props.config.multitenancy.enabled);
 
     // if browser request, auth logic is:
     //   1. check if request includes auth header or paramter(e.g. jwt in url params) is present, if so, authenticate with auth header.
@@ -106,6 +123,7 @@ export abstract class AuthenticationType implements IAuthenticationType {
     //   3. verify whether auth cookie is valid, if not valid, send to authentication workflow
     //   4. if cookie is valid, pass to route handlers
     const authHeaders = {};
+
     let cookie: SecuritySessionCookie | null | undefined;
     let authInfo: any | undefined;
     // if this is an REST API call, suppose the request includes necessary auth header
@@ -115,13 +133,17 @@ export abstract class AuthenticationType implements IAuthenticationType {
         const additonalAuthHeader = this.getAdditionalAuthHeader(request);
         Object.assign(authHeaders, additonalAuthHeader);
         authInfo = await this.securityClient.authinfo(request, additonalAuthHeader);
-        this.logger.error("******** authInfo: " + authInfo.user);
         cookie = this.getCookie(request, authInfo);
 
         // set tenant from cookie if exist
-        const browserCookie = await this.sessionStorageFactory.asScoped(request).get();
+
+
         if (browserCookie && isValidTenant(browserCookie.tenant)) {
           cookie.tenant = browserCookie.tenant;
+        }
+        else {
+          this.logger.error("********** FInally !!!!!!!!!! *********************")
+          use_default_tenant = true;
         }
 
         this.sessionStorageFactory.asScoped(request).set(cookie);
@@ -167,10 +189,38 @@ export abstract class AuthenticationType implements IAuthenticationType {
       Object.assign(authHeaders, additonalAuthHeader);
     }
 
+    if (!authInfo) {
+      authInfo = await this.securityClient.authinfo(request, authHeaders);
+      this.logger.error("******** authInfo xxx: " + JSON.stringify(authInfo));
+      const auth1 = authInfo.default_tenant;
+      this.logger.error("******** authInfo string  " + auth1);
+    }
+
     // resolve tenant if necessary
     if (this.config.multitenancy?.enabled) {
       try {
-        const tenant = await this.resolveTenant(request, cookie!, authHeaders, authInfo);
+        let tenant = await this.resolveTenant(request, cookie!, authHeaders, authInfo);
+        if(cookie!=null){
+          this.logger.error("*** cookie_tenant = " + cookie.tenant);
+        }
+        else {
+          this.logger.error("*** cookie is null ");
+        }
+        let authInfoString = authInfo.default_tenant;
+        this.logger.error("******* authinfo: " + authInfoString);
+
+        if (authInfoString) {
+          this.logger.error("*** authinfo_default_tenant = " + authInfoString);
+          if(cookie.tenant == null) {
+            tenant = authInfoString;
+          }
+        }
+        if (use_default_tenant) {
+          tenant = authInfo.default_tenant;
+        }
+
+
+        this.logger.error("******** tenant from authrntication_type.ts: " + tenant);
         // return 401 if no tenant available
         if (!isValidTenant(tenant)) {
           return response.badRequest({
@@ -205,10 +255,7 @@ export abstract class AuthenticationType implements IAuthenticationType {
         throw error;
       }
     }
-    if (!authInfo) {
-      authInfo = await this.securityClient.authinfo(request, authHeaders);
-      this.logger.error("******** authInfo xxx: " + JSON.stringify(authInfo));
-    }
+
     authState.authInfo = authInfo;
 
     return toolkit.authenticated({
