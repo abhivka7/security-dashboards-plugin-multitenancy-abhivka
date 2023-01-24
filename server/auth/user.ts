@@ -21,4 +21,5 @@ export interface User {
   selectedTenant?: string;
   credentials?: any;
   proxyCredentials?: any;
+  tenancy_enabled?:boolean;
 }

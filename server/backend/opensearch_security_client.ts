@@ -39,6 +39,7 @@ export class SecurityClient {
         selectedTenant: esResponse.user_requested_tenant,
         credentials,
         proxyCredentials: credentials,
+        tenancy_enabled: esResponse.tenancy_enabled,
       };
     } catch (error: any) {
       throw new Error(error.message);

@@ -94,6 +94,7 @@ export class BasicAuthRoutes {
             username: request.body.username,
             password: request.body.password,
           });
+          context.security_plugin.logger.info('******* tenancy_enabled:  ' + user.tenancy_enabled);
         } catch (error: any) {
           context.security_plugin.logger.error(`Failed authentication: ${error}`);
           return response.unauthorized({
@@ -118,14 +119,16 @@ export class BasicAuthRoutes {
         };
 
         if (this.config.multitenancy?.enabled) {
-          const selectTenant = resolveTenant(
-            request,
-            user.username,
-            user.roles,
-            user.tenants,
-            this.config,
-            sessionStorage
-          );
+          // const selectTenant = resolveTenant(
+          //   request,
+          //   user.username,
+          //   user.roles,
+          //   user.tenants,
+          //   this.config,
+          //   sessionStorage
+          // );
+          const selectTenant = user.selectedTenant;
+          context.security_plugin.logger.info('******* selectTenant:  ' + selectTenant);
           sessionStorage.tenant = selectTenant;
         }
         this.sessionStorageFactory.asScoped(request).set(sessionStorage);
@@ -204,14 +207,16 @@ export class BasicAuthRoutes {
           };
 
           if (this.config.multitenancy?.enabled) {
-            const selectTenant = resolveTenant(
-              request,
-              user.username,
-              user.roles,
-              user.tenants,
-              this.config,
-              sessionStorage
-            );
+            // const selectTenant = resolveTenant(
+            //   request,
+            //   user.username,
+            //   user.roles,
+            //   user.tenants,
+            //   this.config,
+            //   sessionStorage
+            // );
+            const selectTenant = user.selectedTenant;
+            context.security_plugin.logger.info('******* selectTenant_2:  ' + selectTenant);
             sessionStorage.tenant = selectTenant;
           }
           this.sessionStorageFactory.asScoped(request).set(sessionStorage);
