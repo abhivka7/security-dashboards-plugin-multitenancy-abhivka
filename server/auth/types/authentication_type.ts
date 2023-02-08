@@ -246,15 +246,33 @@ export abstract class AuthenticationType implements IAuthenticationType {
       }
     }
 
-    const selectedTenant = resolveTenant(
-      request,
-      authInfo.user_name,
-      authInfo.roles,
-      authInfo.tenants,
-      this.config,
-      cookie
+    // return resolveTenant(
+    //   request,
+    //   authInfo.user_name,
+    //   authInfo.roles,
+    //   authInfo.tenants,
+    //   this.config,
+    //   cookie,
+    //   authInfo.tenancy_enabled,
+    //   authInfo.private_tenant_enabled,
+    //   authInfo.default_tenant,
+    // );
+
+    return resolveTenant(
+      {
+        request: request,
+        username: authInfo.user_name,
+        roles: authInfo.roles,
+        availabeTenants: authInfo.tenants,
+        config: this.config,
+        cookie: cookie,
+        tenancy_enabled: authInfo.tenancy_enabled,
+        private_tenant_enabled: authInfo.private_tenant_enabled,
+        default_tenant: authInfo.default_tenant
+      }
     );
-    return selectedTenant;
+
+    // return selectedTenant;
   }
 
   isPageRequest(request: OpenSearchDashboardsRequest) {

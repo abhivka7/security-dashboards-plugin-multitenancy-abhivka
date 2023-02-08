@@ -15,6 +15,7 @@
 
 import { ILegacyClusterClient, OpenSearchDashboardsRequest } from '../../../../src/core/server';
 import { User } from '../auth/user';
+import { getAuthInfo } from '../../public/utils/auth-info-utils';
 
 export class SecurityClient {
   constructor(private readonly esClient: ILegacyClusterClient) {}
@@ -39,6 +40,9 @@ export class SecurityClient {
         selectedTenant: esResponse.user_requested_tenant,
         credentials,
         proxyCredentials: credentials,
+        tenancy_enabled: esResponse.tenancy_enabled,
+        private_tenant_enabled: esResponse.private_tenant_enabled,
+        default_tenant: esResponse.default_tenant,
       };
     } catch (error: any) {
       throw new Error(error.message);

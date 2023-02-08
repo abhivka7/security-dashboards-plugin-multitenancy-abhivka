@@ -18,27 +18,37 @@ import { OpenSearchDashboardsRequest } from '../../../../src/core/server';
 import { SecuritySessionCookie } from '../session/security_cookie';
 import { SecurityPluginConfigType } from '..';
 import { GLOBAL_TENANT_SYMBOL, PRIVATE_TENANT_SYMBOL } from '../../common';
-
+import { Logger } from 'opensearch-dashboards/server';
 export const PRIVATE_TENANTS: string[] = [PRIVATE_TENANT_SYMBOL, 'private'];
 export const GLOBAL_TENANTS: string[] = ['global', GLOBAL_TENANT_SYMBOL];
 /**
  * Resovles the tenant the user is using.
  *
  * @param request OpenSearchDashboards request.
+ * @param username
+ * @param roles
+ * @param availabeTenants
  * @param config security plugin config.
  * @param cookie cookie extracted from the request. The cookie should have been parsed by AuthenticationHandler.
  * pass it as parameter instead of extracting again.
- * @param authInfo authentication info, the Elasticsearch authinfo API response.
+ * @param tenancy_enabled
+ * @param private_tenant_enabled
+ * @param default_tenant
  *
  * @returns user preferred tenant of the request.
  */
 export function resolveTenant(
-  request: OpenSearchDashboardsRequest,
-  username: string,
-  roles: string[] | undefined,
-  availabeTenants: any,
-  config: SecurityPluginConfigType,
-  cookie: SecuritySessionCookie
+  {
+    request,
+    username,
+    roles,
+    availabeTenants,
+    config,
+    cookie,
+    tenancy_enabled,
+    private_tenant_enabled,
+    default_tenant
+  }: { request: any, username: string, roles: string[] | undefined, availabeTenants: any, config: SecurityPluginConfigType, cookie: SecuritySessionCookie, tenancy_enabled: boolean, private_tenant_enabled: boolean | undefined, default_tenant: string | undefined },
 ): string | undefined {
   const DEFAULT_READONLY_ROLES = ['kibana_read_only'];
   let selectedTenant: string | undefined;
@@ -58,7 +68,10 @@ export function resolveTenant(
       : (request.headers.securityTenant_ as string);
   } else if (isValidTenant(cookie.tenant)) {
     selectedTenant = cookie.tenant;
-  } else {
+  } else if (default_tenant  && tenancy_enabled) {
+    selectedTenant = default_tenant;
+  }
+  else {
     selectedTenant = undefined;
   }
   const isReadonly = roles?.some(
@@ -75,7 +88,7 @@ export function resolveTenant(
     preferredTenants,
     availabeTenants,
     globalTenantEnabled,
-    privateTenantEnabled
+    private_tenant_enabled
   );
 }
 
@@ -85,7 +98,7 @@ function resolve(
   preferredTenants: string[] | undefined,
   availableTenants: any, // is an object like { tenant_name_1: true, tenant_name_2: false, ... }
   globalTenantEnabled: boolean,
-  privateTenantEnabled: boolean
+  privateTenantEnabled: boolean | undefined,
 ): string | undefined {
   const availableTenantsClone = cloneDeep(availableTenants);
   delete availableTenantsClone[username];

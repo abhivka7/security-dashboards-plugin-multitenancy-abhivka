@@ -38,6 +38,10 @@ export interface AuthInfo {
   tenants: {
     [tenant: string]: boolean;
   };
+  private_tenant_enabled : boolean;
+  tenancy_enabled : boolean;
+
+  default_tenant: string;
 }
 
 export interface ClientConfigType {
