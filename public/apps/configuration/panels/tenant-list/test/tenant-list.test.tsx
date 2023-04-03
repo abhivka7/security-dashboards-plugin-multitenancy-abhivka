@@ -13,7 +13,7 @@
  *   permissions and limitations under the License.
  */
 
-import { TenantList } from '../tenant-list';
+import { TenantList } from '../manage_tab';
 import { shallow } from 'enzyme';
 import React from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';

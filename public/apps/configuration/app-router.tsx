@@ -15,7 +15,7 @@
 
 import { EuiBreadcrumb, EuiPage, EuiPageBody, EuiPageSideBar } from '@elastic/eui';
 import { flow, map, mapValues, partial } from 'lodash';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import { AppDependencies } from '../types';
 import { AuditLogging } from './panels/audit-logging/audit-logging';
@@ -38,6 +38,7 @@ import { UserList } from './panels/user-list';
 import { Action, ResourceType, RouteItem, SubAction } from './types';
 import { buildHashUrl, buildUrl } from './utils/url-builder';
 import { CrossPageToast } from './cross-page-toast';
+import { getAuthInfo } from '../../utils/auth-info-utils';
 
 const LANDING_PAGE_URL = '/getstarted';
 
@@ -131,6 +132,7 @@ export function AppRouter(props: AppDependencies) {
   const setGlobalBreadcrumbs = flow(getBreadcrumbs, props.coreStart.chrome.setBreadcrumbs);
 
   return (
+
     <Router basename={props.params.appBasePath}>
       <EuiPage>
         {allNavPanelUrls.map((route) => (
@@ -228,11 +230,12 @@ export function AppRouter(props: AppDependencies) {
                 return <PermissionList {...props} />;
               }}
             />
+            //****************************
             <Route
               path={ROUTE_MAP.tenants.href}
               render={() => {
                 setGlobalBreadcrumbs(ResourceType.tenants);
-                return <TenantList {...props} />;
+                return <TenantList tabID={'Manage'} {...props} />;
               }}
             />
             <Route

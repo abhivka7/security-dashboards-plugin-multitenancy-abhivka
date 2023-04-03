@@ -14,6 +14,8 @@
  */
 
 import {
+  EuiPage,
+  EuiPageBody,
   EuiButton,
   EuiText,
   EuiTitle,
@@ -30,10 +32,71 @@ import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { AppDependencies } from '../../types';
 import securityStepsDiagram from '../../../assets/get_started.svg';
-import { buildHashUrl } from '../utils/url-builder';
-import { Action, ResourceType } from '../types';
+import { buildHashUrl, buildUrl } from '../utils/url-builder';
+import { Action, ResourceType, RouteItem, SubAction } from '../types';
 import { API_ENDPOINT_CACHE, DocLinks } from '../constants';
 import { ExternalLink, ExternalLinkButton } from '../utils/display-utils';
+import { TenantList } from './tenant-list/tenant-list';
+import { getBreadcrumbs } from '../app-router';
+import { flow, map, mapValues, partial } from 'lodash';
+
+import { HashRouter as Router, Route, Switch, Redirect, Routes, useNavigate } from 'react-router-dom';
+import { NavPanel } from './nav-panel';
+import { RoleEditMappedUser } from './role-mapping/role-edit-mapped-user';
+import { RoleView } from './role-view/role-view';
+import { RoleEdit } from './role-edit/role-edit';
+import { RoleList } from './role-list';
+import { AuthView } from './auth-view/auth-view';
+import { InternalUserEdit } from './internal-user-edit/internal-user-edit';
+import { UserList } from './user-list';
+import { SUB_URL_FOR_COMPLIANCE_SETTINGS_EDIT, SUB_URL_FOR_GENERAL_SETTINGS_EDIT } from './audit-logging/constants';
+import { AuditLoggingEditSettings } from './audit-logging/audit-logging-edit-settings';
+import { AuditLogging } from './audit-logging/audit-logging';
+import { PermissionList } from './permission-list/permission-list';
+import { CrossPageToast } from '../cross-page-toast';
+
+
+const LANDING_PAGE_URL = '/getstarted';
+const ROUTE_MAP: { [key: string]: RouteItem } = {
+  getStarted: {
+    name: 'Get Started',
+    href: LANDING_PAGE_URL,
+  },
+  [ResourceType.roles]: {
+    name: 'Roles',
+    href: buildUrl(ResourceType.roles),
+  },
+  [ResourceType.users]: {
+    name: 'Internal users',
+    href: buildUrl(ResourceType.users),
+  },
+  [ResourceType.permissions]: {
+    name: 'Permissions',
+    href: buildUrl(ResourceType.permissions),
+  },
+  [ResourceType.tenants]: {
+    name: 'Tenants',
+    href: buildUrl(ResourceType.tenants),
+  },
+  [ResourceType.auth]: {
+    name: 'Authentication',
+    href: buildUrl(ResourceType.auth),
+  },
+  [ResourceType.auditLogging]: {
+    name: 'Audit logs',
+    href: buildUrl(ResourceType.auditLogging),
+  },
+};
+
+const ROUTE_LIST = [
+  ROUTE_MAP.getStarted,
+  ROUTE_MAP[ResourceType.auth],
+  ROUTE_MAP[ResourceType.roles],
+  ROUTE_MAP[ResourceType.users],
+  ROUTE_MAP[ResourceType.permissions],
+  ROUTE_MAP[ResourceType.tenants],
+  ROUTE_MAP[ResourceType.auditLogging],
+];
 
 const addBackendStep = {
   title: 'Add backends',
@@ -156,7 +219,14 @@ const setOfSteps = [
   },
 ];
 
-export function GetStarted(props: AppDependencies) {
+interface GetStartedProps extends AppDependencies {
+  tabID: string;
+}
+
+
+
+export function GetStarted(props: GetStartedProps) {
+  const setGlobalBreadcrumbs = flow(getBreadcrumbs, props.coreStart.chrome.setBreadcrumbs);
   let steps;
   if (props.config.ui.backend_configurable) {
     steps = [addBackendStep, ...setOfSteps];
@@ -164,6 +234,39 @@ export function GetStarted(props: AppDependencies) {
     steps = setOfSteps;
   }
 
+  //**************************************************************
+  const switchToManageTenancy = async (props: AppDependencies) => {
+    // return <TenantList tabID={'Manage'} {...props} />;
+    return(
+      <Router basename={props.params.appBasePath}>
+        <Route
+          path={buildUrl(ResourceType.tenants)}
+          render={() => {
+            setGlobalBreadcrumbs(ResourceType.tenants);
+            return <TenantList tabID={'Configure'} {...props} />;
+          }}
+        />
+        <CrossPageToast />
+      </Router>
+    );
+  }
+
+  const MyFirstElement = () => {
+    const navigate = useNavigate();
+    return (
+      <>
+        <EuiButton onClick={() => navigate(ROUTE_MAP.tenants.href)}>Click me</EuiButton>
+        <Route
+          path={ROUTE_MAP.tenants.href}
+          render={() => {
+            setGlobalBreadcrumbs(ResourceType.tenants);
+            return <TenantList tabID={'Manage'} {...props} />;
+          }}
+        />
+      </>
+    );
+  }
+  const navigate = useNavigate;
   return (
     <>
       <div className="panel-restrict-width">
@@ -246,7 +349,47 @@ export function GetStarted(props: AppDependencies) {
             </EuiButton>
           </EuiText>
         </EuiPanel>
-      </div>
+
+        <EuiSpacer size="l" />
+
+        <EuiPanel paddingSize="l">
+          <EuiTitle size="s">
+            <h3>Optional: Tenancy</h3>
+          </EuiTitle>
+          <EuiText size="s" color="subdued">
+            <p>
+              By default tenancy is activated in Dashboards. Tenants in OpenSearch Dashboards are
+              spaces for saving index patterns, visualizations, dashboards, and other OpenSearch
+              Dashboards objects.
+            </p>
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    onClick={() => {
+                      // props.tabID = "Configure";
+                      window.location.href = buildHashUrl(ResourceType.tenants);
+                    }}
+                  >
+                    Manage Tenancy
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={() => {
+                      // props.tabID = "Configure"
+                      window.location.href = buildHashUrl(ResourceType.tenants);
+                    }}
+                  >
+                    Configure Tenancy
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+          </EuiText>
+        </EuiPanel>
+
+  </div>
     </>
   );
 }

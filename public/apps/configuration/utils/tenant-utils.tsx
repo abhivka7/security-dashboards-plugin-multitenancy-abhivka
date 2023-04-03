@@ -18,7 +18,9 @@ import { map } from 'lodash';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import {
+  API_ENDPOINT_DEFAULT_TENANT,
   API_ENDPOINT_MULTITENANCY,
+  API_ENDPOINT_MULTITENANCY_ENABLED, API_ENDPOINT_PRIVATE_TENANT_ENABLED,
   API_ENDPOINT_TENANTS,
   RoleViewTenantInvalidText,
   TENANT_READ_PERMISSION,
@@ -29,13 +31,14 @@ import {
   ObjectsMessage,
   RoleTenantPermission,
   RoleTenantPermissionDetail,
-  RoleTenantPermissionView,
+  RoleTenantPermissionView, TenancyBooleanInterface,
   Tenant,
   TenantPermissionType,
   TenantSelect,
   TenantUpdate,
+
 } from '../types';
-import { httpDelete, httpGet, httpPost } from './request-utils';
+import { httpDelete, httpGet, httpPost, httpPut } from './request-utils';
 import { getResourceUrl } from './resource-utils';
 import {
   DEFAULT_TENANT,
@@ -44,8 +47,9 @@ import {
   globalTenantName,
   isGlobalTenant,
   isRenderingPrivateTenant,
-  PRIVATE_TENANT_RENDERING_TEXT,
+  PRIVATE_TENANT_RENDERING_TEXT, SAML_AUTH_LOGIN,
 } from '../../../../common';
+import {TenancyConfigSettings} from '../panels/tenancy-config/types';
 
 export const GLOBAL_USER_DICT: { [key: string]: string } = {
   Label: 'Global',
@@ -69,7 +73,7 @@ export async function fetchTenantNameList(http: HttpStart): Promise<string[]> {
 
 export function transformTenantData(
   rawTenantData: DataObject<Tenant>,
-  isPrivateEnabled: boolean
+  isPrivateEnabled?: boolean
 ): Tenant[] {
   // @ts-ignore
   const tenantList: Tenant[] = map<Tenant, Tenant>(rawTenantData, (v: Tenant, k?: string) => ({
@@ -78,15 +82,21 @@ export function transformTenantData(
     description: k === globalTenantName ? GLOBAL_USER_DICT.Description : v.description,
     tenantValue: k === globalTenantName ? GLOBAL_USER_DICT.Value : k || GLOBAL_TENANT_SYMBOL,
   }));
-  if (isPrivateEnabled) {
-    // Insert Private Tenant in List
-    tenantList.splice(1, 0, {
-      tenant: PRIVATE_USER_DICT.Label,
-      reserved: true,
-      description: PRIVATE_USER_DICT.Description,
-      tenantValue: PRIVATE_USER_DICT.Value,
-    });
-  }
+  tenantList.splice(1, 0, {
+    tenant: PRIVATE_USER_DICT.Label,
+    reserved: true,
+    description: PRIVATE_USER_DICT.Description,
+    tenantValue: PRIVATE_USER_DICT.Value,
+  });
+  // if (isPrivateEnabled) {
+  //   // Insert Private Tenant in List
+  //   tenantList.splice(1, 0, {
+  //     tenant: PRIVATE_USER_DICT.Label,
+  //     reserved: true,
+  //     description: PRIVATE_USER_DICT.Description,
+  //     tenantValue: PRIVATE_USER_DICT.Value,
+  //   });
+  // }     *** Remove this code.
   return tenantList;
 }
 
@@ -100,6 +110,30 @@ export async function updateTenant(
   updateObject: TenantUpdate
 ) {
   return await httpPost(http, getResourceUrl(API_ENDPOINT_TENANTS, tenantName), updateObject);
+}
+
+export async function updateTenancyConfiguration(
+  http: HttpStart,
+  originalTenancyConfig: TenancyConfigSettings,
+  updatedTenancyConfig: TenancyConfigSettings)
+{
+  if(originalTenancyConfig.multitenancy_enabled != updatedTenancyConfig.multitenancy_enabled)
+  {
+    await httpPut(http, API_ENDPOINT_MULTITENANCY_ENABLED, {value:updatedTenancyConfig.multitenancy_enabled});
+  }
+
+  if( (originalTenancyConfig.private_tenant_enabled != updatedTenancyConfig.private_tenant_enabled) && updatedTenancyConfig.multitenancy_enabled )
+  {
+    await httpPut(http, API_ENDPOINT_PRIVATE_TENANT_ENABLED, {value:false});
+  }
+
+  if( (originalTenancyConfig.default_tenant != updatedTenancyConfig.default_tenant) && updatedTenancyConfig.multitenancy_enabled )
+  {
+    await httpPut(http, API_ENDPOINT_DEFAULT_TENANT, {value:updatedTenancyConfig.default_tenant});
+  }
+
+  return;
+
 }
 
 export async function requestDeleteTenant(http: HttpStart, tenants: string[]) {

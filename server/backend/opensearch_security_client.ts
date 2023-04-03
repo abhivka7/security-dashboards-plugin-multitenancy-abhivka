@@ -15,6 +15,7 @@
 
 import { ILegacyClusterClient, OpenSearchDashboardsRequest } from '../../../../src/core/server';
 import { User } from '../auth/user';
+import { getAuthInfo } from '../../public/utils/auth-info-utils';
 
 export class SecurityClient {
   constructor(private readonly esClient: ILegacyClusterClient) {}
@@ -39,6 +40,9 @@ export class SecurityClient {
         selectedTenant: esResponse.user_requested_tenant,
         credentials,
         proxyCredentials: credentials,
+        multitenancy_enabled: esResponse.multitenancy_enabled,
+        private_tenant_enabled: esResponse.private_tenant_enabled,
+        default_tenant: esResponse.default_tenant,
       };
     } catch (error: any) {
       throw new Error(error.message);
@@ -126,6 +130,53 @@ export class SecurityClient {
       throw new Error(error.message);
     }
   }
+
+  public async putMultitenancyEnabled(request: OpenSearchDashboardsRequest, value: boolean) {
+    const body = {
+      value: value,
+    };
+    try {
+      return await this.esClient
+        .asScoped(request)
+        .callAsCurrentUser('opensearch_security.multitenancy_enabled', {
+          body,
+        });
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
+  public async putPrivateTenantEnabled(request: OpenSearchDashboardsRequest, value: boolean) {
+    const body = {
+      value: value,
+    };
+    try {
+      return await this.esClient
+        .asScoped(request)
+        .callAsCurrentUser('opensearch_security.private_tenant_enabled', {
+          body,
+        });
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
+
+  public async putDefaultTenant(request: OpenSearchDashboardsRequest, value: string) {
+    const body = {
+      value: value,
+    };
+    try {
+      return await this.esClient
+        .asScoped(request)
+        .callAsCurrentUser('opensearch_security.default_tenant', {
+          body,
+        });
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
 
   public async getTenantInfoWithInternalUser() {
     try {

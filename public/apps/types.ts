@@ -14,13 +14,15 @@
  */
 
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
-import { SecurityPluginStartDependencies, ClientConfigType } from '../types';
+import { SecurityPluginStartDependencies, ClientConfigType, AuthInfo } from '../types';
 
 export interface AppDependencies {
   coreStart: CoreStart;
   navigation: SecurityPluginStartDependencies;
   params: AppMountParameters;
   config: ClientConfigType;
+  authInfo: AuthInfo;
+
 }
 
 export interface BreadcrumbsPageDependencies extends AppDependencies {

@@ -42,11 +42,12 @@ import {
   ClientConfigType,
   SecurityPluginSetup,
   SecurityPluginStart,
-  SecurityPluginSetupDependencies,
+  SecurityPluginSetupDependencies, AuthInfo,
 } from './types';
 import { addTenantToShareURL } from './services/shared-link';
 import { interceptError } from './utils/logout-utils';
 import { tenantColumn, getNamespacesToRegister } from './apps/configuration/utils/tenant-utils';
+import { getAuthInfo } from './utils/auth-info-utils';
 
 async function hasApiPermission(core: CoreSetup): Promise<boolean | undefined> {
   try {
@@ -86,6 +87,7 @@ export class SecurityPlugin
     const apiPermission = await hasApiPermission(core);
 
     const config = this.initializerContext.config.get<ClientConfigType>();
+    const authInfo = this.initializerContext.config.get<AuthInfo>();
 
     const accountInfo = (await fetchAccountInfoSafe(core.http))?.data;
     const isReadonly = accountInfo?.roles.some((role) =>
@@ -101,6 +103,8 @@ export class SecurityPlugin
           const { renderApp } = await import('./apps/configuration/configuration-app');
           const [coreStart, depsStart] = await core.getStartServices();
 
+          // const auth1 = (await getAuthInfo(props.coreStart.http))
+
           // merge OpenSearchDashboards yml configuration
           includeClusterPermissions(config.clusterPermissions.include);
           includeIndexPermissions(config.indexPermissions.include);
@@ -108,7 +112,8 @@ export class SecurityPlugin
           excludeFromDisabledTransportCategories(config.disabledTransportCategories.exclude);
           excludeFromDisabledRestCategories(config.disabledRestCategories.exclude);
 
-          return renderApp(coreStart, depsStart as SecurityPluginStartDependencies, params, config);
+
+          return renderApp(coreStart, depsStart as SecurityPluginStartDependencies, params, config, authInfo);
         },
         category: {
           id: 'opensearch',

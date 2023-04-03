@@ -167,7 +167,7 @@ export class SamlAuthRoutes {
           }
         } catch (error) {
           context.security_plugin.logger.error(
-            `SAML SP initiated authentication workflow failed: ${error}`
+            `SAML SP initiated authentication workflow failed: n${error}`
           );
         }
 

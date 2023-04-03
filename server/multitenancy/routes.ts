@@ -115,6 +115,85 @@ export function setupMultitenantRoutes(
     }
   );
 
+  router.put(
+    {
+      path: '/api/v1/configuration/tenancy/multitenancy_enabled',
+      validate: {
+        body: schema.object({
+          value: schema.boolean(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const esResponse = await securityClient.putMultitenancyEnabled(request, request.body.value);
+        return response.ok({
+          body: esResponse,
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+      } catch (error) {
+        return response.internalError({
+          body: error.message,
+        });
+      }
+    }
+  );
+
+  router.put(
+    {
+      path: '/api/v1/configuration/tenancy/private_tenant_enabled',
+      validate: {
+        body: schema.object({
+          value: schema.boolean(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const esResponse = await securityClient.putPrivateTenantEnabled(request, request.body.value);
+        return response.ok({
+          body: esResponse,
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+      } catch (error) {
+        return response.internalError({
+          body: error.message,
+        });
+      }
+    }
+  );
+
+
+  router.put(
+    {
+      path: '/api/v1/configuration/tenancy/default_tenant',
+      validate: {
+        body: schema.object({
+          value: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const esResponse = await securityClient.putDefaultTenant(request, request.body.value);
+        return response.ok({
+          body: esResponse,
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+      } catch (error) {
+        return response.internalError({
+          body: error.message,
+        });
+      }
+    }
+  );
+
   router.post(
     {
       // FIXME: Seems this is not being used, confirm and delete if not used anymore

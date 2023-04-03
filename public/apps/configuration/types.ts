@@ -121,6 +121,10 @@ export interface TenantSelect extends TenantName {
   username: string;
 }
 
+export interface TenancyBooleanInterface {
+  value: boolean;
+}
+
 export interface RoleTenantPermissionDetail extends RoleTenantPermissionView, Tenant {}
 
 export interface UserAttributes {

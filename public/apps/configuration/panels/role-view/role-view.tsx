@@ -406,7 +406,7 @@ export function RoleView(props: RoleViewProps) {
       />
 
       <EuiSpacer />
-      <EuiGlobalToastList toasts={toasts} toastLifeTimeMs={10000} dismissToast={removeToast} />
+      <EuiGlobalToastList toasts={toasts} toastLifeTimeMs={300} dismissToast={removeToast} />
       {deleteConfirmModal}
     </>
   );

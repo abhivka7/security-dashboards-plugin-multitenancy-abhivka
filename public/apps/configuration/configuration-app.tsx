@@ -19,16 +19,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@osd/i18n/react';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import { SecurityPluginStartDependencies, ClientConfigType } from '../../types';
+import { SecurityPluginStartDependencies, ClientConfigType, AuthInfo} from '../../types';
 import { AppRouter } from './app-router';
 
 export function renderApp(
   coreStart: CoreStart,
   navigation: SecurityPluginStartDependencies,
   params: AppMountParameters,
-  config: ClientConfigType
+  config: ClientConfigType,
+  authInfo: AuthInfo
 ) {
-  const deps = { coreStart, navigation, params, config };
+  const deps = { coreStart, navigation, params, config, authInfo };
   ReactDOM.render(
     <I18nProvider>
       <AppRouter {...deps} />

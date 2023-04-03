@@ -70,4 +70,29 @@ export default function (Client: any, config: any, components: any) {
       fmt: '/_plugins/_security/api/authtoken',
     },
   });
+
+  Client.prototype.opensearch_security.prototype.multitenancy_enabled = ca({
+    method: 'PUT',
+    needBody: true,
+    url: {
+      fmt: '/_plugins/_security/api/tenancy/multitenancy_enabled',
+    },
+  });
+
+  Client.prototype.opensearch_security.prototype.private_tenant_enabled = ca({
+    method: 'PUT',
+    needBody: true,
+    url: {
+      fmt: '/_plugins/_security/api/tenancy/private_tenant_enabled',
+    },
+  });
+
+  Client.prototype.opensearch_security.prototype.default_tenant = ca({
+    method: 'PUT',
+    needBody: true,
+    url: {
+      fmt: '/_plugins/_security/api/tenancy/default_tenant',
+    },
+  });
+
 }

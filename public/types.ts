@@ -34,10 +34,14 @@ export interface SecurityPluginStartDependencies {
 }
 
 export interface AuthInfo {
-  user_name: string;
-  tenants: {
+  user_name?: string;
+  tenants?: {
     [tenant: string]: boolean;
   };
+  private_tenant_enabled? : boolean;
+  multitenancy_enabled? : boolean;
+
+  default_tenant: string;
 }
 
 export interface ClientConfigType {
