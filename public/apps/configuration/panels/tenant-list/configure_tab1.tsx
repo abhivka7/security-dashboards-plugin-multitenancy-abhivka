@@ -70,13 +70,14 @@ import {
   getSuccessToastMessage,
   useToastState,
 } from '../../utils/toast-utils';
+import { getDashboardsInfo } from '../../../../utils/dashboards-info-utils';
 
 
 export function ConfigureTab1(props: AppDependencies) {
 
-  const [isMultiTenancyEnabled, setIsMultiTenancyEnabled] = useState(props.authInfo.multitenancy_enabled);
-  const [isPrivateTenantEnabled, setIsPrivateTenantEnabled] = useState(props.authInfo.private_tenant_enabled);
-  const [dashboardsDefaultTenant, setDashboardsDefaultTenant] = useState(props.authInfo.default_tenant);
+  const [isMultiTenancyEnabled, setIsMultiTenancyEnabled] = useState(props.dashboardsInfo.multitenancy_enabled);
+  const [isPrivateTenantEnabled, setIsPrivateTenantEnabled] = useState(props.dashboardsInfo.private_tenant_enabled);
+  const [dashboardsDefaultTenant, setDashboardsDefaultTenant] = useState(props.dashboardsInfo.default_tenant);
 
   const [originalConfiguration, setOriginalConfiguration] = React.useState<TenancyConfigSettings>({
     multitenancy_enabled:isMultiTenancyEnabled,
@@ -196,18 +197,18 @@ export function ConfigureTab1(props: AppDependencies) {
     try {
 
       await setOriginalConfiguration({
-        multitenancy_enabled:(await getAuthInfo(props.coreStart.http)).multitenancy_enabled,
-        private_tenant_enabled:(await getAuthInfo(props.coreStart.http)).private_tenant_enabled,
-        default_tenant:(await getAuthInfo(props.coreStart.http)).default_tenant});
+        multitenancy_enabled:(await getDashboardsInfo(props.coreStart.http)).multitenancy_enabled,
+        private_tenant_enabled:(await getDashboardsInfo(props.coreStart.http)).private_tenant_enabled,
+        default_tenant:(await getDashboardsInfo(props.coreStart.http)).default_tenant});
 
       await setUpdatedConfiguration({
-        multitenancy_enabled:(await getAuthInfo(props.coreStart.http)).multitenancy_enabled,
-        private_tenant_enabled:(await getAuthInfo(props.coreStart.http)).private_tenant_enabled,
-        default_tenant:(await getAuthInfo(props.coreStart.http)).default_tenant});
+        multitenancy_enabled:(await getDashboardsInfo(props.coreStart.http)).multitenancy_enabled,
+        private_tenant_enabled:(await getDashboardsInfo(props.coreStart.http)).private_tenant_enabled,
+        default_tenant:(await getDashboardsInfo(props.coreStart.http)).default_tenant});
 
       const rawTenantData = await fetchTenants(props.coreStart.http);
       const processedTenantData = transformTenantData(rawTenantData,
-        (await getAuthInfo(props.coreStart.http)).private_tenant_enabled);
+        (await getDashboardsInfo(props.coreStart.http)).private_tenant_enabled);
       setTenantData(processedTenantData);
 
     } catch (e) {

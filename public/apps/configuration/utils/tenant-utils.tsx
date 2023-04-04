@@ -41,6 +41,7 @@ import {
 import { httpDelete, httpGet, httpPost, httpPut } from './request-utils';
 import { getResourceUrl } from './resource-utils';
 import {
+  API_ENDPOINT_DASHBOARDSINFO,
   DEFAULT_TENANT,
   GLOBAL_TENANT_RENDERING_TEXT,
   GLOBAL_TENANT_SYMBOL,

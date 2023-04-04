@@ -58,15 +58,16 @@ import { fetchTenants, transformTenantData } from '../../utils/tenant-utils';
 import { Tenant } from '../../types';
 import { showTableStatusMessage } from '../../utils/loading-spinner-utils';
 import { useContextMenuState } from '../../utils/context-menu';
+import { getDashboardsInfo } from '../../../../utils/dashboards-info-utils';
 
 export function ConfigureTab(props: AppDependencies) {
-  // const [isOriginalMultiTenancyEnabled, setIsOriginalMultiTenancyEnabled] = useState(props.authInfo.multitenancy_enabled);
-  // const [isOriginalPrivateTenantEnabled, setIsOriginalPrivateTenantEnabled] = useState(props.authInfo.private_tenant_enabled);
-  // const [dashboardsOriginalDefaultTenant, setOriginalDashboardsDefaultTenant] = useState(props.authInfo.default_tenant);
+  // const [isOriginalMultiTenancyEnabled, setIsOriginalMultiTenancyEnabled] = useState(props.dashboardsInfo.multitenancy_enabled);
+  // const [isOriginalPrivateTenantEnabled, setIsOriginalPrivateTenantEnabled] = useState(props.dashboardsInfo.private_tenant_enabled);
+  // const [dashboardsOriginalDefaultTenant, setOriginalDashboardsDefaultTenant] = useState(props.dashboardsInfo.default_tenant);
 
-  const [isMultiTenancyEnabled, setIsMultiTenancyEnabled] = useState(props.authInfo.multitenancy_enabled);
-  const [isPrivateTenantEnabled, setIsPrivateTenantEnabled] = useState(props.authInfo.private_tenant_enabled);
-  const [dashboardsDefaultTenant, setDashboardsDefaultTenant] = useState(props.authInfo.default_tenant);
+  const [isMultiTenancyEnabled, setIsMultiTenancyEnabled] = useState(props.dashboardsInfo.multitenancy_enabled);
+  const [isPrivateTenantEnabled, setIsPrivateTenantEnabled] = useState(props.dashboardsInfo.private_tenant_enabled);
+  const [dashboardsDefaultTenant, setDashboardsDefaultTenant] = useState(props.dashboardsInfo.default_tenant);
 
   // const [originalConfiguration, setOriginalConfiguration] = React.useState<TenancyConfigSettings>({});
   const [updatedConfiguration, setUpdatedConfiguration] = React.useState<TenancyConfigSettings>({});
@@ -195,12 +196,12 @@ export function ConfigureTab(props: AppDependencies) {
     React.useEffect(() => {
       const fetchData = async () => {
         try {
-          setIsMultiTenancyEnabled((await getAuthInfo(props.coreStart.http)).multitenancy_enabled);
-          setIsPrivateTenantEnabled((await getAuthInfo(props.coreStart.http)).private_tenant_enabled);
-          setDashboardsDefaultTenant((await getAuthInfo(props.coreStart.http)).default_tenant);
+          setIsMultiTenancyEnabled((await getDashboardsInfo(props.coreStart.http)).multitenancy_enabled);
+          setIsPrivateTenantEnabled((await getDashboardsInfo(props.coreStart.http)).private_tenant_enabled);
+          setDashboardsDefaultTenant((await getDashboardsInfo(props.coreStart.http)).default_tenant);
           const rawTenantData = await fetchTenants(props.coreStart.http);
           const processedTenantData = transformTenantData(rawTenantData,
-            (await getAuthInfo(props.coreStart.http)).private_tenant_enabled);
+            (await getDashboardsInfo(props.coreStart.http)).private_tenant_enabled);
           setTenantData(processedTenantData);
 
 

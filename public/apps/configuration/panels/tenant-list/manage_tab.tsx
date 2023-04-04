@@ -90,6 +90,7 @@ import { AuditLogging } from '../audit-logging/audit-logging';
 import { PermissionList } from '../permission-list/permission-list';
 import { GetStarted } from '../get-started';
 import { CrossPageToast } from '../../cross-page-toast';
+import { getDashboardsInfo } from '../../../../utils/dashboards-info-utils';
 
 export function ManageTab(props: AppDependencies) {
   const setGlobalBreadcrumbs = flow(getBreadcrumbs, props.coreStart.chrome.setBreadcrumbs);
@@ -106,13 +107,13 @@ export function ManageTab(props: AppDependencies) {
   const [query, setQuery] = useState<Query | null>(null);
 
   // Configuration
-  // const isMultiTenancyEnabled = props.authInfo.multitenancy_enabled;
-  // const isPrivateTenantEnabled = props.authInfo.private_tenant_enabled;
-  // const default_tenant = props.authInfo.default_tenant;
+  // const isMultiTenancyEnabled = props.dashboardsInfo.multitenancy_enabled;
+  // const isPrivateTenantEnabled = props.dashboardsInfo.private_tenant_enabled;
+  // const default_tenant = props.dashboardsInfo.default_tenant;
 
-  const [isMultiTenancyEnabled, setIsMultiTenancyEnabled] = useState(props.authInfo.multitenancy_enabled);
-  const [isPrivateTenantEnabled, setIsPrivateTenantEnabled] = useState(props.authInfo.private_tenant_enabled);
-  const [dashboardsDefaultTenant, setDashboardsDefaultTenant] = useState(props.authInfo.default_tenant);
+  const [isMultiTenancyEnabled, setIsMultiTenancyEnabled] = useState(props.dashboardsInfo.multitenancy_enabled);
+  const [isPrivateTenantEnabled, setIsPrivateTenantEnabled] = useState(props.dashboardsInfo.private_tenant_enabled);
+  const [dashboardsDefaultTenant, setDashboardsDefaultTenant] = useState(props.dashboardsInfo.default_tenant);
 
   const [tenancyConfig, setTenancyConfig] = React.useState<TenancyConfigSettings>();
 
@@ -122,15 +123,15 @@ export function ManageTab(props: AppDependencies) {
       setLoading(true);
       const rawTenantData = await fetchTenants(props.coreStart.http);
       const processedTenantData = transformTenantData(rawTenantData,
-        (await getAuthInfo(props.coreStart.http)).private_tenant_enabled);
+        (await getDashboardsInfo(props.coreStart.http)).private_tenant_enabled);
       const activeTenant = await fetchCurrentTenant(props.coreStart.http);
       const currentUser = await getCurrentUser(props.coreStart.http);
       setCurrentUsername(currentUser);
       setCurrentTenant(resolveTenantName(activeTenant, currentUser));
       setTenantData(processedTenantData);
-      setIsMultiTenancyEnabled((await getAuthInfo(props.coreStart.http)).multitenancy_enabled);
-      setIsPrivateTenantEnabled((await getAuthInfo(props.coreStart.http)).private_tenant_enabled);
-      setDashboardsDefaultTenant((await getAuthInfo(props.coreStart.http)).default_tenant);
+      setIsMultiTenancyEnabled((await getDashboardsInfo(props.coreStart.http)).multitenancy_enabled);
+      setIsPrivateTenantEnabled((await getDashboardsInfo(props.coreStart.http)).private_tenant_enabled);
+      setDashboardsDefaultTenant((await getDashboardsInfo(props.coreStart.http)).default_tenant);
     } catch (e) {
       console.log(e);
       setErrorFlag(true);

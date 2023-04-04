@@ -43,6 +43,7 @@ import { fetchAccountInfo } from './utils';
 import { constructErrorMessageAndLog } from '../error-utils';
 import { getSavedTenant, setSavedTenant } from '../../utils/storage-utils';
 import { getAuthInfo } from '../../utils/auth-info-utils';
+import { getDashboardsInfo } from '../../utils/dashboards-info-utils';
 
 interface TenantSwitchPanelProps {
   coreStart: CoreStart;
@@ -88,8 +89,8 @@ export function TenantSwitchPanel(props: TenantSwitchPanelProps) {
         const accountInfo = await fetchAccountInfo(props.coreStart.http);
         setRoles(accountInfo.data.roles);
 
-        setIsPrivateEnabled((await getAuthInfo(props.coreStart.http)).private_tenant_enabled);
-        setIsMultiTenancyEnabled((await getAuthInfo(props.coreStart.http)).multitenancy_enabled);
+        setIsPrivateEnabled((await getDashboardsInfo(props.coreStart.http)).private_tenant_enabled);
+        setIsMultiTenancyEnabled((await getDashboardsInfo(props.coreStart.http)).multitenancy_enabled);
 
         const tenantsInfo = accountInfo.data.tenants || {};
         setTenants(keys(tenantsInfo));

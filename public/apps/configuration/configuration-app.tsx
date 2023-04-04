@@ -19,7 +19,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@osd/i18n/react';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import { SecurityPluginStartDependencies, ClientConfigType, AuthInfo} from '../../types';
+import { SecurityPluginStartDependencies, ClientConfigType, DashboardsInfo} from '../../types';
 import { AppRouter } from './app-router';
 
 export function renderApp(
@@ -27,9 +27,9 @@ export function renderApp(
   navigation: SecurityPluginStartDependencies,
   params: AppMountParameters,
   config: ClientConfigType,
-  authInfo: AuthInfo
+  dashboardsInfo: DashboardsInfo
 ) {
-  const deps = { coreStart, navigation, params, config, authInfo };
+  const deps = { coreStart, navigation, params, config, dashboardsInfo };
   ReactDOM.render(
     <I18nProvider>
       <AppRouter {...deps} />

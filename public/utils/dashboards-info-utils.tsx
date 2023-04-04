@@ -13,18 +13,13 @@
  *   permissions and limitations under the License.
  */
 
-import { AppMountParameters, CoreStart } from '../../../../src/core/public';
-import { SecurityPluginStartDependencies, ClientConfigType, DashboardsInfo } from '../types';
+import { HttpStart } from 'opensearch-dashboards/public';
+import { API_ENDPOINT_DASHBOARDSINFO } from '../../common';
+import { httpGet } from '../apps/configuration/utils/request-utils';
+import { DashboardsInfo } from '../types';
 
-export interface AppDependencies {
-  coreStart: CoreStart;
-  navigation: SecurityPluginStartDependencies;
-  params: AppMountParameters;
-  config: ClientConfigType;
-  dashboardsInfo: DashboardsInfo;
-
+export async function getDashboardsInfo(http: HttpStart) {
+  return await httpGet<DashboardsInfo>(http, API_ENDPOINT_DASHBOARDSINFO);
 }
 
-export interface BreadcrumbsPageDependencies extends AppDependencies {
-  buildBreadcrumbs: (pageTitle: string, subAction?: string) => void;
-}
+

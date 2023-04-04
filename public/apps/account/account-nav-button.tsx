@@ -37,6 +37,7 @@ import { resolveTenantName } from '../configuration/utils/tenant-utils';
 import { getShouldShowTenantPopup, setShouldShowTenantPopup } from '../../utils/storage-utils';
 import { getAuthInfo } from '../../utils/auth-info-utils';
 import { fetchAccountInfo } from './utils';
+import { getDashboardsInfo } from '../../utils/dashboards-info-utils';
 
 export function AccountNavButton(props: {
   coreStart: CoreStart;
@@ -73,7 +74,7 @@ export function AccountNavButton(props: {
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        setIsMultiTenancyEnabled((await getAuthInfo(props.coreStart.http)).multitenancy_enabled);
+        setIsMultiTenancyEnabled((await getDashboardsInfo(props.coreStart.http)).multitenancy_enabled);
 
       } catch (e) {
         // TODO: switch to better error display.

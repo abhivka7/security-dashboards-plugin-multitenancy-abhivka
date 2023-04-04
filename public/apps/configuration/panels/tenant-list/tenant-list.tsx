@@ -32,6 +32,7 @@ import { displayBoolean } from '../../utils/display-utils';
 import { DocLinks } from '../../constants';
 import { fetchCurrentTenant, fetchTenants, resolveTenantName, transformTenantData } from '../../utils/tenant-utils';
 import { getAuthInfo, getCurrentUser } from '../../../../utils/auth-info-utils';
+import { getDashboardsInfo } from '../../../../utils/dashboards-info-utils';
 
 
 interface TenantListProps extends AppDependencies {
@@ -40,14 +41,14 @@ interface TenantListProps extends AppDependencies {
 
 export function TenantList( props: TenantListProps) {
 
-  const [isMultiTenancyEnabled, setIsMultiTenancyEnabled] = useState(props.authInfo.multitenancy_enabled);
+  const [isMultiTenancyEnabled, setIsMultiTenancyEnabled] = useState(props.dashboardsInfo.multitenancy_enabled);
 
 
   let tenancyDisabledWarning;
 
   const fetchData = async () => {
     try {
-      await setIsMultiTenancyEnabled((await getAuthInfo(props.coreStart.http)).multitenancy_enabled);
+      await setIsMultiTenancyEnabled((await getDashboardsInfo(props.coreStart.http)).multitenancy_enabled);
 
     } catch (e) {
       console.log(e);

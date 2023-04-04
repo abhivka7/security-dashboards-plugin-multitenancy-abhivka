@@ -38,9 +38,11 @@ export interface AuthInfo {
   tenants?: {
     [tenant: string]: boolean;
   };
-  private_tenant_enabled? : boolean;
-  multitenancy_enabled? : boolean;
+}
 
+export interface DashboardsInfo {
+  multitenancy_enabled? : boolean;
+  private_tenant_enabled? : boolean;
   default_tenant: string;
 }
 
