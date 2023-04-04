@@ -101,4 +101,12 @@ export default function (Client: any, config: any, components: any) {
     },
   });
 
+  Client.prototype.opensearch_security.prototype.multitenancy_configurations = ca({
+    method: 'PUT',
+    needBody: true,
+    url: {
+      fmt: '/_plugins/_security/api/tenancy/multitenancy_configurations',
+    },
+  });
+
 }

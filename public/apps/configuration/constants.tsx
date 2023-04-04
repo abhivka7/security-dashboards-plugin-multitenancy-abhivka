@@ -22,7 +22,11 @@ export const API_ENDPOINT_ROLESMAPPING = API_ENDPOINT + '/rolesmapping';
 export const API_ENDPOINT_ACTIONGROUPS = API_ENDPOINT + '/actiongroups';
 export const API_ENDPOINT_TENANTS = API_ENDPOINT + '/tenants';
 export const API_ENDPOINT_MULTITENANCY = API_PREFIX + '/multitenancy/tenant';
+
 export const API_ENDPOINT_MULTITENANCY_ENABLED = API_ENDPOINT + '/tenancy/multitenancy_enabled';
+export const API_ENDPOINT_MULTITENANCY_CONFIGURATIONS = API_ENDPOINT + '/tenancy/multitenancy_configurations';
+
+
 export const API_ENDPOINT_PRIVATE_TENANT_ENABLED = API_ENDPOINT + '/tenancy/private_tenant_enabled';
 export const API_ENDPOINT_DEFAULT_TENANT = API_ENDPOINT + '/tenancy/default_tenant';
 export const API_ENDPOINT_SECURITYCONFIG = API_ENDPOINT + '/securityconfig';

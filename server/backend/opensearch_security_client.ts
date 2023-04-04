@@ -16,6 +16,7 @@
 import { ILegacyClusterClient, OpenSearchDashboardsRequest } from '../../../../src/core/server';
 import { User } from '../auth/user';
 import { getAuthInfo } from '../../public/utils/auth-info-utils';
+import { TenancyConfigSettings } from '../../public/apps/configuration/panels/tenancy-config/types';
 
 export class SecurityClient {
   constructor(private readonly esClient: ILegacyClusterClient) {}
@@ -43,6 +44,7 @@ export class SecurityClient {
         multitenancy_enabled: esResponse.multitenancy_enabled,
         private_tenant_enabled: esResponse.private_tenant_enabled,
         default_tenant: esResponse.default_tenant,
+        multitenancy_configurations: esResponse.multitenancy_configurations,
       };
     } catch (error: any) {
       throw new Error(error.message);
@@ -170,6 +172,23 @@ export class SecurityClient {
       return await this.esClient
         .asScoped(request)
         .callAsCurrentUser('opensearch_security.default_tenant', {
+          body,
+        });
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
+  public async putMultitenancyConfigurations(request: OpenSearchDashboardsRequest, tenancyConfigSettings: TenancyConfigSettings) {
+    const body = {
+      multitenancy_enabled: tenancyConfigSettings.multitenancy_enabled,
+      private_tenant_enabled: tenancyConfigSettings.private_tenant_enabled,
+      default_tenant: tenancyConfigSettings.default_tenant,
+    };
+    try {
+      return await this.esClient
+        .asScoped(request)
+        .callAsCurrentUser('opensearch_security.multitenancy_configurations', {
           body,
         });
     } catch (error: any) {

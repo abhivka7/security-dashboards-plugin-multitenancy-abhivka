@@ -19,7 +19,7 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import {
   API_ENDPOINT_DEFAULT_TENANT,
-  API_ENDPOINT_MULTITENANCY,
+  API_ENDPOINT_MULTITENANCY, API_ENDPOINT_MULTITENANCY_CONFIGURATIONS,
   API_ENDPOINT_MULTITENANCY_ENABLED, API_ENDPOINT_PRIVATE_TENANT_ENABLED,
   API_ENDPOINT_TENANTS,
   RoleViewTenantInvalidText,
@@ -118,20 +118,24 @@ export async function updateTenancyConfiguration(
   originalTenancyConfig: TenancyConfigSettings,
   updatedTenancyConfig: TenancyConfigSettings)
 {
-  if(originalTenancyConfig.multitenancy_enabled != updatedTenancyConfig.multitenancy_enabled)
-  {
-    await httpPut(http, API_ENDPOINT_MULTITENANCY_ENABLED, {value:updatedTenancyConfig.multitenancy_enabled});
-  }
+  // if(originalTenancyConfig.multitenancy_enabled != updatedTenancyConfig.multitenancy_enabled)
+  // {
+  //   await httpPut(http, API_ENDPOINT_MULTITENANCY_ENABLED, {value:updatedTenancyConfig.multitenancy_enabled});
+  // }
+  //
+  // if( (originalTenancyConfig.private_tenant_enabled != updatedTenancyConfig.private_tenant_enabled) && updatedTenancyConfig.multitenancy_enabled )
+  // {
+  //   await httpPut(http, API_ENDPOINT_PRIVATE_TENANT_ENABLED, {value:false});
+  // }
+  //
+  // if( (originalTenancyConfig.default_tenant != updatedTenancyConfig.default_tenant) && updatedTenancyConfig.multitenancy_enabled )
+  // {
+  //   await httpPut(http, API_ENDPOINT_DEFAULT_TENANT, {value:updatedTenancyConfig.default_tenant});
+  // }
+  //
+  // return;
 
-  if( (originalTenancyConfig.private_tenant_enabled != updatedTenancyConfig.private_tenant_enabled) && updatedTenancyConfig.multitenancy_enabled )
-  {
-    await httpPut(http, API_ENDPOINT_PRIVATE_TENANT_ENABLED, {value:false});
-  }
-
-  if( (originalTenancyConfig.default_tenant != updatedTenancyConfig.default_tenant) && updatedTenancyConfig.multitenancy_enabled )
-  {
-    await httpPut(http, API_ENDPOINT_DEFAULT_TENANT, {value:updatedTenancyConfig.default_tenant});
-  }
+  await httpPut(http, API_ENDPOINT_MULTITENANCY_CONFIGURATIONS, updatedTenancyConfig);
 
   return;
 
